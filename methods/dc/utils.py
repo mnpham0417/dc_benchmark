@@ -8,6 +8,7 @@ from torch.utils.data import Dataset
 from torchvision import datasets, transforms
 from scipy.ndimage.interpolation import rotate as scipyrotate
 from networks import MLP, ConvNet, LeNet, AlexNet, AlexNetBN, VGG11, VGG11BN, ResNet18, ResNet18BN_AP, ResNet18BN
+import logging
 
 def get_dataset(dataset, data_path):
     if dataset == 'MNIST':
@@ -206,9 +207,42 @@ def get_network(model, channel, num_classes, im_size=(32, 32)):
         device = 'cpu'
     net = net.to(device)
 
+    net = NetWrapper(net).to(device)
+
     return net
 
+class NetWrapper(nn.Module):
+    def __init__(self, net):
+        super(NetWrapper, self).__init__()
+        self.net = net
+    
+    def forward(self, x):  
+        def create_mask1(input, num_frame):
+            '''
+            Keep only top left of image
+            '''
+            mask = torch.ones_like(input)
+            
+            for i in range(num_frame, mask.shape[2]):
+                mask[:, :, i, :] = 0
+                
+            for j in range(num_frame, mask.shape[3]):
+                mask[:, :, :, j] = 0
+            return mask
+        
+        def create_mask2(input):
+            '''
+            Keep only 16x16 middle part of image
+            '''
+            mask = torch.zeros_like(input)
+            mask[:, :, 8:24, 8:24] = 1
 
+            return mask
+
+        # mask = create_mask2(x)
+
+        # x = x * mask
+        return self.net(x)
 
 def get_time():
     return str(time.strftime("[%Y-%m-%d %H:%M:%S]", time.localtime()))
@@ -639,6 +673,22 @@ def rand_cutout(x, param):
     x = x * mask.unsqueeze(1)
     return x
 
+def get_logger(file_path):
+    """ Make python logger """
+    # [!] Since tensorboardX use default logger (e.g. logging.info()), we should use custom logger
+    logger = logging.getLogger('darts')
+    log_format = '%(asctime)s | %(message)s'
+    formatter = logging.Formatter(log_format, datefmt='%m/%d %I:%M:%S %p')
+    file_handler = logging.FileHandler(file_path)
+    file_handler.setFormatter(formatter)
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(formatter)
+
+    logger.addHandler(file_handler)
+    logger.addHandler(stream_handler)
+    logger.setLevel(logging.INFO)
+
+    return logger
 
 AUGMENT_FNS = {
     'color': [rand_brightness, rand_saturation, rand_contrast],
