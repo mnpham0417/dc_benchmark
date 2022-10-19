@@ -165,3 +165,10 @@ note.txt
 
 # for distiled results
 **/distilled_results/
+
+# slurm output files
+*.out
+
+# wandb
+wandb/
+result/
