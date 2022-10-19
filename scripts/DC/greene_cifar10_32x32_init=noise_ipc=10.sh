@@ -7,7 +7,7 @@
 #SBATCH --job-name=dcbench
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=mp5847@nyu.edu
-#SBATCH --output=greene_cifar10_32x32_init=noise_ipc=10_%A_%j.out
+#SBATCH --output=greene_cifar10_32x32_init=noise_ipc=10_dc_%A_%j.out
 
 module purge
 
@@ -16,4 +16,4 @@ singularity exec --nv \
 	--overlay /scratch/work/public/imagenet/imagenet-val.sqf:ro \
 	--overlay /scratch/mp5847/singularity_containers/overlay-50G-10M.ext3:ro \
 	/scratch/work/public/singularity/cuda11.2.2-cudnn8-devel-ubuntu20.04.sif \
-	/bin/bash -c "source /ext3/env.sh; python3 /home/mp5847/src/dc_benchmark/methods/dc/main.py --dataset CIFAR10 --model ConvNet --ipc 10 --Iteration 20000 --data_path /home/mp5847/src/dc_benchmark/methods/dc/data --name greene_cifar10_32x32_init=noise_ipc=10 --log_path ./output_DC"
+	/bin/bash -c "source /ext3/env.sh; python3 /home/mp5847/src/dc_benchmark/methods/dc/main.py --dataset CIFAR10 --model ConvNet --ipc 10 --Iteration 1000 --data_path /home/mp5847/src/dc_benchmark/methods/dc/data --name greene_cifar10_32x32_init=noise_ipc=10 --log_path ./output/DC/cifar10_32x32_init=noise_ipc=10 --save_path ./result/DC/cifar10_32x32_init=noise_ipc=10" 

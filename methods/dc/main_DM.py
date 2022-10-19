@@ -42,10 +42,10 @@ def main():
     wandb.init(name=args.name, project="data condensation", entity="mnphamx1")
 
     if not os.path.exists(args.data_path):
-        os.mkdir(args.data_path)
+        os.makedirs(args.data_path)
 
     if not os.path.exists(args.save_path):
-        os.mkdir(args.save_path)
+        os.makedirs(args.save_path)
 
     if os.path.exists(args.log_path) is not True:
         os.makedirs(args.log_path)

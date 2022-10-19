@@ -8,7 +8,6 @@ import torch.nn as nn
 from torchvision.utils import save_image
 from utils import get_loops, get_dataset, get_network, get_eval_pool, evaluate_synset, get_daparam, match_loss, get_time, TensorDataset, epoch, DiffAugment, ParamDiffAug, get_logger
 import wandb
-from models import *
 
 def main():
 
@@ -43,10 +42,10 @@ def main():
     wandb.init(name=args.name, project="data condensation", entity="mnphamx1")
 
     if not os.path.exists(args.data_path):
-        os.mkdir(args.data_path)
+        os.makedirs(args.data_path)
 
     if not os.path.exists(args.save_path):
-        os.mkdir(args.save_path)
+        os.makedirs(args.save_path)
 
     if os.path.exists(args.log_path) is not True:
         os.makedirs(args.log_path)
@@ -111,19 +110,6 @@ def main():
             logger.info('initialize synthetic data from random real images')
             for c in range(num_classes):
                 image_syn.data[c*args.ipc:(c+1)*args.ipc] = get_images(c, args.ipc).detach().data
-        elif args.init == 'pretrained':
-            #load pretrained model
-            pretrained_model = ResNet50()
-            pretrained_weights = torch.load("/home/mp5847/src/dc_benchmark/pretrained_models/resnet18_dcbench_32x32/model_epoch=245.pt", map_location="cpu").state_dict()
-            pretrained_model.load_state_dict(pretrained_weights)
-            
-            logger.info('initialize synthetic data from embeddings of pretrained model')
-            for c in range(num_classes):
-                imgs = get_images(c, args.ipc).detach().to("cpu")
-                embeddings = pretrained_model.get_embedding(imgs).reshape(len(imgs), 1, 32, 32).repeat(1,3,1,1)
-
-                # image_syn.data[c*args.ipc:(c+1)*args.ipc,:, 8:24, 8:24] = embeddings.detach().data
-                image_syn.data[c*args.ipc:(c+1)*args.ipc,:, :, :] = embeddings.detach().data
         else:
             logger.info('initialize synthetic data from random noise')
 
